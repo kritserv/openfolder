@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+
+terminal="gnome-terminal"
+editor="micro" #(micro / nano / vi)
+bin_openfolder="openfolder"
+
+# to make arguments and cd commands works together
+# put entire openfolder code into .bashrc 
+# alternatively, just change to-
+# the right directory before using openfolder.
+
+if [ "$#" -eq 1 ]; then
+    cd "$1"
+fi
+
+clear
+echo ""
+work_dir=`pwd`
+work_dir=${work_dir//$HOME/}
+if [[ $work_dir = "" ]]; then
+	work_dir="/ 🏚️";
+fi
+echo "$work_dir 🔨"
+echo ""
+
+i=-1
+files=()
+for f in `ls -a`; do
+	if [ -d $f ]; then
+		if [[ $f = "." ]]; then
+			((i++))
+			emoji='🔄';
+			files[$i]=$f
+			echo -e "$i\t $emoji update"
+		elif [[ $f = ".git" ]] || [[ $f = ".github" ]]; then
+			((i++))
+			emoji='🐙';
+			files[$i]=$f
+			echo -e "$i\t $emoji $f"
+		else
+			((i++))
+			emoji='📁';
+			files[$i]=$f
+			echo -e "$i\t $emoji $f"
+		fi
+	else
+		if [[ $f = "."* ]]; then
+			if [[ $f = ".gitignore"* ]]; then
+				((i++))
+				emoji='🐙';
+                files[$i]=$f
+				echo -e "$i\t $emoji $f"
+			elif [[ $f = ".dockerignore"* ]]; then
+				((i++))
+				emoji='🐳'
+                files[$i]=$f
+				echo -e "$i\t $emoji $f"
+			fi
+		else
+			if [[ $f = *".sh" ]]; then
+				emoji='🐧';
+			elif [[ $f = *".deb" ]]; then
+				emoji='📦';
+			elif [[ $f = *".apk" ]]; then
+				emoji='📱';
+			elif [[ $f = *".appimage" ]] || [[ $f = *".exe" ]]; then
+				emoji='⚙️';
+			elif [[ $f = "DOCKERFILE" ]]; then
+				emoji='🐳';
+			elif [[ $f = *".yaml" ]]; then
+				emoji='🚢';
+			elif [[ $f = *".7z" ]] || [[ $f = *".rar" ]] || [[ $f = *".tar"* ]] || [[ $f = *".z" ]] || [[ $f = *".zip" ]]; then
+				emoji='🗜️';
+			elif [[ $f = *".mp3" ]] || [[ $f = *".wav" ]] || [[ $f = *".ogg" ]]; then
+				emoji='🎹';
+			elif [[ $f = *".mp4" ]] || [[ $f = *".mov" ]] || [[ $f = *".wmv" ]] || [[ $f = *".avi" ]]; then
+				emoji='🎬';
+			elif [[ $f = *".ico" ]] || [[ $f = *".jpeg" ]] || [[ $f = *".jpg" ]] || [[ $f = *".png" ]] || [[ $f = *".webp" ]] || [[ $f = *".svg" ]] || [[ $f = *".psd" ]]; then
+				emoji='🖼️';
+			elif [[ $f = *".rb" ]]; then
+				emoji='💎';
+			elif [[ $f = *".py" ]] || [[ $f = *".ipynb" ]]; then
+				emoji='🐍';
+			elif [[ $f = *".php" ]]; then
+				emoji='🐘';
+			elif [[ $f = *".rust" ]]; then
+				emoji='🦀';
+			elif [[ $f = *".go" ]]; then
+				emoji='🐭';
+			elif [[ $f = *".dart" ]]; then
+				emoji='💉';
+			elif [[ $f = *".java" ]] || [[ $f = *".jar" ]]; then
+				emoji='☕';
+			elif [[ $f = *".html" ]]; then
+				emoji='🌐';
+			elif [[ $f = *".css" ]]; then
+				emoji='🔮';
+			elif [[ $f = *".js" ]]; then
+				emoji='🍪';
+			elif [[ $f = *".c" ]]; then
+				emoji='🍩';
+			elif [[ $f = *".asm" ]]; then
+				emoji='🤝';
+			elif [[ $f = *".db" ]] || [[ $f = *".sqlite" ]] || [[ $f = *".sql" ]]; then
+				emoji='🛢️';
+			elif [[ $f = *".txt" ]] || [[ $f = *".csv" ]] || [[ $f = *".json" ]]; then
+				emoji='📃';
+			elif [[ $f = *".md" ]] || [[ $f = *".MD" ]]; then
+				emoji='♏';
+			elif [[ $f = "LICENSE" ]]; then
+				emoji='📜';
+			elif [[ $f = *".log" ]]; then
+				emoji='🪵';
+			else
+				emoji='📄';
+			fi
+			((i++))
+            files[$i]=$f
+			echo -e "$i\t $emoji $f"
+		fi
+	fi
+done 
+
+echo ""
+echo "To turn off help use 'openf' instead of 'openfolder'"
+echo "Select directory or file by name or number,"
+echo "Run terminal command using 'run -' eg. 'run - touch test',"
+echo "then return ↩  (Ctrl-c to exit): "
+read userselect
+
+echo ""
+if [[ $userselect = "run -"* ]]; then
+	remove_run="run - "
+	run_command=${userselect//$remove_run/}
+	bash ~/.bash_aliases
+	run_output=$(eval "$run_command" 2>&1)
+	echo "$run_output"
+	echo ""
+	echo "done!"
+	echo ""
+	echo "return ↩ to close output"
+	read return
+	. $bin_openfolder
+fi
+
+if [[ -z $userselect ]]; then
+	echo "You selected nothing."
+	sleep 0.3
+	. $bin_openfolder
+elif [[ $userselect =~ ^[0-9]+$ ]]; then
+	if [[ ${files[$userselect]} ]]; then
+		selected_file="${files[$userselect]}"
+		if [[ -d $selected_file ]]; then
+			cd "$selected_file"
+			. $bin_openfolder
+		else
+			$terminal -- $editor "$selected_file"
+			sleep 0.5
+			. $bin_openfolder
+		fi
+	else
+		echo "Invalid selection."
+		sleep 0.3
+		. $bin_openfolder
+	fi
+else
+	if [[ -e $userselect ]]; then
+		if [[ -d $userselect ]]; then
+			cd "$userselect"
+			. $bin_openfolder
+		else
+			$terminal -- $editor "$userselect"
+			sleep 0.5
+			. $bin_openfolder
+		fi
+	else
+		echo "Invalid selection."
+		sleep 0.3
+		. $bin_openfolder
+	fi
+fi
+
+echo ""
