@@ -2,7 +2,11 @@
 
 Bash script linux file explorer in terminal for terminal text editor (works well with gnome-terminal and micro/nano)
 
-<img src="/preview.png">
+```
+openfolder
+```
+
+<img src="screenshot.png">
 
 # Installation
 
@@ -24,4 +28,8 @@ echo $PATH
 cd openfolder
 chmod +x openfolder
 mv openfolder "$HOME/.local/bin/"
+```
+
+```
+openfolder
 ```
